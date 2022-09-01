@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DevTechTest.Models;
 using DevTechTest.Data;
-using DevTechTest.Helper;
 using DevTechTest.DTO;
 
 namespace DevTechTest.Controllers
@@ -60,17 +59,17 @@ namespace DevTechTest.Controllers
         /// <param name="jobId"></param>
         [HttpGet("GetNotes/{jobId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<IEnumerable<JobNote>>> GetNotesForJob(int jobId)
+        public async Task<ActionResult<IEnumerable<JobNote>>> GetNotesForJobAsync(int jobId)
         {
-            Job j = await _repo.GetJobByIdAsync(jobId);
+            Job? j = await _repo.GetJobByIdAsync(jobId);
             if (j == null)
-                return NotFound();
-
-            IEnumerable<JobNote> notes = _repo.GetNotesForJob(jobId);
+                return BadRequest();
+            IEnumerable<JobNote> notes = await _repo.GetNotesForJobAsync(jobId);
             return Ok(notes);
         }
+
 
         /// <summary>
         /// Adds a note to the database for the given jobId. If the job doesn't exist then
@@ -82,7 +81,7 @@ namespace DevTechTest.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
         [HttpPost("AddNote")]
-        public async Task<ActionResult<JobNote>> AddJobNote(NoteInputDTO note)
+        public async Task<ActionResult<JobNote>> AddJobNoteAsync(NoteInputDTO note)
         {
             Job? j = await _repo.GetJobByIdAsync(note.JobId);
             if (j == null)
@@ -90,10 +89,12 @@ namespace DevTechTest.Controllers
             JobNote newNote = await _repo.AddJobNoteAsync(
                 new JobNote { JobId = note.JobId, Note = note.Note });
             return Accepted(newNote);
+            // I would use CreatedAtAction(), however I don't have an appropriate endpoint for it.
+            // I'd make it, but I'm unfortunately very limited on time, too much life to live!
         }
 
         /// <summary>
-        /// Updates a note for the given noteId, else returns status code 400
+        /// Updates a note for the given noteId, else returns BadRequest 400
         /// </summary>
         /// <param name="noteId"></param>
         /// <param name="updatedNote"></param>

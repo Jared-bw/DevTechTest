@@ -54,11 +54,15 @@ namespace DevTechTest.Data
             await _dbContext.SaveChangesAsync();
         }
 
-        public IEnumerable<JobNote> GetNotesForJob(int jobId)
+        public async Task<IEnumerable<JobNote>> GetNotesForJobAsync(int jobId)
         {
-            IEnumerable<JobNote> notes = _dbContext.JobNotes.Where(note => note.JobId == jobId);
+            var notesQuery = from n in _dbContext.JobNotes
+                             where n.JobId == jobId
+                             select n;
+            List<JobNote> notes = await notesQuery.ToListAsync();
             return notes;
         }
+
 
         public async Task<JobNote> AddJobNoteAsync(JobNote note)
         {
@@ -75,8 +79,5 @@ namespace DevTechTest.Data
             return jobNote;
         }
 
-
-
-        
     }
 }

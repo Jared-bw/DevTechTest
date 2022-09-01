@@ -11,6 +11,7 @@ namespace DevTechTest.Models
         [Required]
         public JobStatus Status { get; set; }
         [Required]
+        [DataType(DataType.Date)]
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [Required]

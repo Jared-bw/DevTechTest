@@ -14,12 +14,13 @@ namespace DevTechTest.Data
 
         Task SaveChangesAsync();
 
-        IEnumerable<JobNote> GetNotesForJob(int jobId);
 
         Task<JobNote> AddJobNoteAsync(JobNote note);
 
         Task<JobNote?> GetJobNoteAsync(int jobNoteId);
 
 
+
+        Task<IEnumerable<JobNote>> GetNotesForJobAsync(int jobId);
     }
 }
