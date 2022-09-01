@@ -118,5 +118,7 @@ namespace DevTechTest.Controllers
             return Accepted(note);
         }
 
+        // TODO : Implement filtering by job status, and sorting by something?
+        // Maybe use a DTO to select values to sort/filter by
     }
 }
