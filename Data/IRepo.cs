@@ -1,9 +1,13 @@
-﻿using DevTechTest.Models;
+﻿using DevTechTest.DTO;
+using DevTechTest.Models;
 
 namespace DevTechTest.Data
 {
     public interface IRepo
     {
+        Task<JobDTO?> GetJobAndClientAsync(int jobId);
+
+
         Task<Job?> GetJobByIdAsync(int id);
 
         Task<Client?> GetClientByIdAsync(int id);
@@ -15,5 +19,7 @@ namespace DevTechTest.Data
         Task<JobNote> AddJobNoteAsync(JobNote note);
 
         Task<JobNote?> GetJobNoteAsync(int jobNoteId);
+
+
     }
 }

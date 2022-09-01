@@ -27,12 +27,10 @@ namespace DevTechTest.Controllers
         [HttpGet("ViewJob/{id}")]
         public async Task<ActionResult<JobDTO>> GetJobByIdAsync(int id)
         {
-            Job? job = await _repo.GetJobByIdAsync(id);
-            if (job == null)
+            JobDTO? dto = await _repo.GetJobAndClientAsync(id);
+            if (dto == null)
                 return NotFound();
-            Client client = await _repo.GetClientByIdAsync(job.ClientId);
 
-            JobDTO dto = Helper.Helper.GetJobDTO(job, client);
             return Ok(dto);
         }
 
@@ -51,9 +49,7 @@ namespace DevTechTest.Controllers
                 return NotFound();
             job.Status = status;
             await _repo.SaveChangesAsync();
-            Client c = await _repo.GetClientByIdAsync(job.ClientId);
-            JobDTO dto = Helper.Helper.GetJobDTO(job, c);
-
+            JobDTO? dto = await _repo.GetJobAndClientAsync(jobId);
             return Ok(dto);
         }
 
@@ -78,40 +74,39 @@ namespace DevTechTest.Controllers
 
         /// <summary>
         /// Adds a note to the database for the given jobId. If the job doesn't exist then
-        /// the controller returns NotFound.
+        /// the controller returns BadRequest.
         /// </summary>
         /// <param name="note"></param>
         /// <returns>The newly added note</returns>
         [ProducesResponseType(StatusCodes.Status202Accepted)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
         [HttpPost("AddNote")]
         public async Task<ActionResult<JobNote>> AddJobNote(NoteInputDTO note)
         {
             Job? j = await _repo.GetJobByIdAsync(note.JobId);
             if (j == null)
-                return NotFound();
-
-            JobNote newNote = new JobNote { JobId=note.JobId, Note=note.Note };
-            JobNote trackedNote = await _repo.AddJobNoteAsync(newNote);
-            return Accepted(trackedNote);
+                return BadRequest();
+            JobNote newNote = await _repo.AddJobNoteAsync(
+                new JobNote { JobId = note.JobId, Note = note.Note });
+            return Accepted(newNote);
         }
 
         /// <summary>
-        /// Updates a note for the given noteId, else returns status code 404
+        /// Updates a note for the given noteId, else returns status code 400
         /// </summary>
         /// <param name="noteId"></param>
         /// <param name="updatedNote"></param>
         /// <returns>Updated note</returns>
         [ProducesResponseType(StatusCodes.Status202Accepted)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
         [HttpPut("UpdateNote/{noteId}")]
         public async Task<ActionResult<JobNote>> UpdateNote(int noteId, string updatedNote)
         {
             JobNote? note = await _repo.GetJobNoteAsync(noteId);
             if (note == null)
-                return NotFound();
+                return BadRequest();
 
             note.Note = updatedNote;
             await _repo.SaveChangesAsync();

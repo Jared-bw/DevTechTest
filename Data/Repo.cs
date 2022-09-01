@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq;
+using DevTechTest.DTO;
 
 namespace DevTechTest.Data
 {
@@ -13,6 +14,28 @@ namespace DevTechTest.Data
         {
             _dbContext = dbContext;
         }
+
+
+        // Learning pulling from multiple relationships
+        public async Task<JobDTO?> GetJobAndClientAsync(int jobId)
+        {
+            IQueryable<JobDTO> jobs = from j in _dbContext.Jobs
+                       join c in _dbContext.Clients
+                       on j.ClientId equals c.Id
+                       where j.Id == jobId
+                       select new JobDTO
+                       {
+                           JobId = j.Id,
+                           JobStatus = j.Status.ToString(),
+                           DateCreated = j.DateCreated.ToString(),
+                           ClientName = c.Name,
+                           ClientEmail = c.Email
+                       };
+            JobDTO? result = await jobs.FirstOrDefaultAsync();
+            return result;
+        }
+
+
 
         public async Task<Job?> GetJobByIdAsync(int id)
         {
@@ -51,5 +74,9 @@ namespace DevTechTest.Data
                 n.Id == jobNoteId);
             return jobNote;
         }
+
+
+
+        
     }
 }
