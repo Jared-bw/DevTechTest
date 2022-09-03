@@ -2,6 +2,7 @@
 using DevTechTest.Models;
 using DevTechTest.Data;
 using DevTechTest.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevTechTest.Controllers
 {
@@ -114,7 +115,48 @@ namespace DevTechTest.Controllers
             return Accepted(note);
         }
 
-        // TODO : Implement filtering by job status, and sorting by something?
-        // Maybe use a DTO to select values to sort/filter by
+        /// <summary>
+        /// Gets the job records from the database, sorted and filtered according
+        /// to the input strings.
+        /// If no sorting input, then it will sort by Client emails alphabetically
+        /// 
+        /// </summary>
+        /// <param name="sortOrder"></param>
+        /// <param name="status"></param>
+        [HttpGet("GetJobsFilteredAndSorted")]
+        public async Task<ActionResult<JobDTO>> GetJobsFilteredAndSorted(string? sortOrder, JobStatus? status)
+        {
+            // I think this implementation is terrible, but I didn't have time to debug the cleaner way I wanted to do it.
+            IQueryable<JobDTO> query;
+            if (status != null)
+            {
+                query = _repo.GetAllJobsQueryFiltered(status);
+            } else
+            {
+                query = _repo.GetAllJobsQuery();
+            }
+
+            sortOrder = String.IsNullOrWhiteSpace(sortOrder) ? "" : sortOrder.ToLower();
+            switch (sortOrder)
+            {
+                case "date":
+                    query = query.OrderBy(j => j.DateCreated);
+                    break;
+                case "date_desc":
+                    query = query.OrderByDescending(j => j.DateCreated);
+                    break;
+                case "client_name":
+                    query = query.OrderBy(j => j.ClientName);
+                    break;
+                case "client_name_desc":
+                    query = query.OrderByDescending(j => j.ClientName);
+                    break;
+                default:
+                    query = query.OrderBy(j => j.ClientEmail);
+                    break;
+            }
+
+            return Ok(await query.ToListAsync());
+        }
     }
 }

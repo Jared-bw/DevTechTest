@@ -19,8 +19,12 @@ namespace DevTechTest.Data
 
         Task<JobNote?> GetJobNoteAsync(int jobNoteId);
 
-
-
         Task<IEnumerable<JobNote>> GetNotesForJobAsync(int jobId);
+
+        // TODO: remove this later
+        Task<IEnumerable<JobDTO>> GetAllJobsAndClientsAsync();
+        IQueryable<JobDTO> GetAllJobsQuery();
+
+        IQueryable<JobDTO> GetAllJobsQueryFiltered(JobStatus? status);
     }
 }

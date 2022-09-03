@@ -27,4 +27,6 @@ namespace DevTechTest.Models
         TO_PRICED,
         COMPLETED
     }
+
+
 }
